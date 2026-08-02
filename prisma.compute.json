@@ -1,0 +1,13 @@
+{
+  "region": "us-east-1",
+  "app": {
+    "name": "globalsermon",
+    "framework": "custom",
+    "httpPort": 3000,
+    "build": {
+      "command": "npm run build",
+      "outputDirectory": ".",
+      "entrypoint": "server.ts"
+    }
+  }
+}
