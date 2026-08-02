@@ -433,8 +433,11 @@ Return JSON: { "translatedChunk": "string" }`;
 // ==================== VITE & STATIC SETUP ====================
 
 async function startServer() {
-  // Initialize local PostgreSQL database if DATABASE_URL is set
-  await initDb();
+  try {
+    await initDb();
+  } catch (dbErr) {
+    console.error('⚠️ Database init error (falling back to in-memory):', dbErr);
+  }
 
   if (process.env.NODE_ENV !== 'production') {
     const vite = await createViteServer({
@@ -450,9 +453,19 @@ async function startServer() {
     });
   }
 
-  app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server running at http://localhost:${PORT}`);
-  });
+  const portParam = process.env.PORT || 3000;
+
+  if (process.env.PORT) {
+    app.listen(portParam, () => {
+      console.log(`Server running on hostinger/production port: ${portParam}`);
+    });
+  } else {
+    app.listen(3000, '0.0.0.0', () => {
+      console.log(`Server running at http://localhost:3000`);
+    });
+  }
 }
 
-startServer();
+startServer().catch((err) => {
+  console.error('Fatal server startup error:', err);
+});
