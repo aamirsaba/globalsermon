@@ -10,7 +10,6 @@ import { initDb, pool } from './src/db.js';
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 
 app.use(express.json({ limit: '10mb' }));
 
@@ -433,12 +432,6 @@ Return JSON: { "translatedChunk": "string" }`;
 // ==================== VITE & STATIC SETUP ====================
 
 async function startServer() {
-  try {
-    await initDb();
-  } catch (dbErr) {
-    console.error('⚠️ Database init error (falling back to in-memory):', dbErr);
-  }
-
   if (process.env.NODE_ENV !== 'production') {
     const vite = await createViteServer({
       server: { middlewareMode: true },
@@ -453,17 +446,16 @@ async function startServer() {
     });
   }
 
-  const portParam = process.env.PORT || 3000;
+  const portParam = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 
-  if (process.env.PORT) {
-    app.listen(portParam, () => {
-      console.log(`Server running on hostinger/production port: ${portParam}`);
-    });
-  } else {
-    app.listen(3000, '0.0.0.0', () => {
-      console.log(`Server running at http://localhost:3000`);
-    });
-  }
+  app.listen(portParam, '0.0.0.0', () => {
+    console.log(`Server listening on port: ${portParam}`);
+  });
+
+  // Non-blocking background database initialization
+  initDb().catch((dbErr) => {
+    console.error('⚠️ Database init error (falling back to in-memory):', dbErr);
+  });
 }
 
 startServer().catch((err) => {
