@@ -1,0 +1,6 @@
+{
+  "name": "Global Sermon Gateway",
+  "description": "Multilingual sermon distribution platform for prayer places across religions with AI translations and live translation room.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
