@@ -17,14 +17,18 @@ import {
   Loader2,
   FileText,
   MessageSquare,
+  Trash2,
 } from 'lucide-react';
 import { Sermon, LanguageOption, TranslationResult, SUPPORTED_LANGUAGES } from '../types';
+import { UserRole } from './Header';
 
 interface SermonViewerModalProps {
   sermon: Sermon;
   selectedLanguage: LanguageOption;
   onClose: () => void;
   onBroadcastTrigger: (sermon: Sermon) => void;
+  onDeleteSermon?: (sermonId: string) => void;
+  userRole?: UserRole;
 }
 
 export const SermonViewerModal: React.FC<SermonViewerModalProps> = ({
@@ -32,11 +36,14 @@ export const SermonViewerModal: React.FC<SermonViewerModalProps> = ({
   selectedLanguage,
   onClose,
   onBroadcastTrigger,
+  onDeleteSermon,
+  userRole,
 }) => {
   const [targetLang, setTargetLang] = useState<LanguageOption>(selectedLanguage);
   const [activeView, setActiveView] = useState<'translated' | 'original' | 'split'>('translated');
   const [loadingTranslation, setLoadingTranslation] = useState<boolean>(false);
   const [translationResult, setTranslationResult] = useState<TranslationResult | null>(null);
+  const [isConfirmingDelete, setIsConfirmingDelete] = useState<boolean>(false);
   
   // Audio Speech Synthesis state
   const [isPlayingAudio, setIsPlayingAudio] = useState<boolean>(false);
@@ -169,12 +176,40 @@ export const SermonViewerModal: React.FC<SermonViewerModalProps> = ({
             </p>
           </div>
 
-          <button
-            onClick={onClose}
-            className="p-2 rounded-xl text-stone-400 hover:text-stone-100 hover:bg-stone-800 transition-colors"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-2">
+            {onDeleteSermon && (userRole === 'super_admin' || userRole === 'masjid_admin') && (
+              <button
+                onClick={() => {
+                  if (isConfirmingDelete) {
+                    onDeleteSermon(sermon.id);
+                    setIsConfirmingDelete(false);
+                    onClose();
+                  } else {
+                    setIsConfirmingDelete(true);
+                    setTimeout(() => setIsConfirmingDelete(false), 4000);
+                  }
+                }}
+                className={`px-3 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-all ${
+                  isConfirmingDelete
+                    ? 'bg-rose-500 text-white animate-pulse ring-2 ring-rose-300'
+                    : 'bg-rose-600/30 hover:bg-rose-600 text-rose-200 border border-rose-500/40'
+                }`}
+                title="Delete Sermon"
+              >
+                <Trash2 className="w-4 h-4" />
+                <span className="hidden sm:inline">
+                  {isConfirmingDelete ? 'Click to Confirm Delete' : 'Delete Sermon'}
+                </span>
+              </button>
+            )}
+
+            <button
+              onClick={onClose}
+              className="p-2 rounded-xl text-stone-400 hover:text-stone-100 hover:bg-stone-800 transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         {/* Translation Control Toolbar */}

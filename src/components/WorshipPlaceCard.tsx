@@ -10,7 +10,9 @@ import {
   ChevronRight,
   Check,
 } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 import { WorshipPlace, Sermon, LanguageOption } from '../types';
+import { UserRole } from './Header';
 
 interface WorshipPlaceCardProps {
   place: WorshipPlace;
@@ -19,6 +21,8 @@ interface WorshipPlaceCardProps {
   onSelectSermon: (sermon: Sermon) => void;
   onJoinPlace: (placeId: string) => void;
   isJoined: boolean;
+  userRole?: UserRole;
+  onDeletePlace?: (placeId: string) => void;
 }
 
 export const WorshipPlaceCard: React.FC<WorshipPlaceCardProps> = ({
@@ -28,8 +32,24 @@ export const WorshipPlaceCard: React.FC<WorshipPlaceCardProps> = ({
   onSelectSermon,
   onJoinPlace,
   isJoined,
+  userRole,
+  onDeletePlace,
 }) => {
   const placeSermons = sermons.filter((s) => s.placeId === place.id);
+  const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
+
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (isConfirmingDelete) {
+      if (onDeletePlace) {
+        onDeletePlace(place.id);
+      }
+      setIsConfirmingDelete(false);
+    } else {
+      setIsConfirmingDelete(true);
+      setTimeout(() => setIsConfirmingDelete(false), 4000);
+    }
+  };
 
   return (
     <div className="rounded-2xl bg-stone-900 border border-stone-800 shadow-xl overflow-hidden hover:border-stone-700 transition-all flex flex-col justify-between group">
@@ -44,15 +64,31 @@ export const WorshipPlaceCard: React.FC<WorshipPlaceCardProps> = ({
         <div className="absolute inset-0 bg-gradient-to-t from-stone-900 via-stone-900/40 to-transparent" />
 
         {/* Top Badges */}
-        <div className="absolute top-3 left-3 right-3 flex items-center justify-between">
-          <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-500/90 text-stone-950 shadow">
-            {place.religion}
-          </span>
+        <div className="absolute top-3 left-3 right-3 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-1.5">
+            <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-500/90 text-stone-950 shadow">
+              {place.religion}
+            </span>
+            <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-stone-900/90 text-amber-300 border border-amber-500/30 backdrop-blur-md flex items-center gap-1">
+              <Calendar className="w-3 h-3" />
+              {place.congregationDay}
+            </span>
+          </div>
 
-          <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-stone-900/90 text-amber-300 border border-amber-500/30 backdrop-blur-md flex items-center gap-1">
-            <Calendar className="w-3 h-3" />
-            {place.congregationDay}
-          </span>
+          {onDeletePlace && (userRole === 'super_admin' || userRole === 'masjid_admin') && (
+            <button
+              onClick={handleDelete}
+              title="Delete Property"
+              className={`px-2.5 py-1 rounded-full text-xs font-bold shadow-lg flex items-center gap-1 transition-all z-10 ${
+                isConfirmingDelete
+                  ? 'bg-rose-500 text-white animate-pulse ring-2 ring-rose-300'
+                  : 'bg-rose-600 hover:bg-rose-500 text-white'
+              }`}
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              <span>{isConfirmingDelete ? 'Confirm Delete?' : 'Delete'}</span>
+            </button>
+          )}
         </div>
 
         {/* Bottom Banner Info */}

@@ -411,10 +411,17 @@ export const PrayerTimes: React.FC<PrayerTimesProps> = ({
     fetchPrayerTimes(cityObj.name, cityObj.country, cityObj.lat, cityObj.lng, calcMethod);
   };
 
-  // Initial load
+  // Sync location dynamically when selected place changes
   useEffect(() => {
-    fetchPrayerTimes(selectedCity, selectedCountry, coordinates.lat, coordinates.lng, calcMethod);
-  }, []);
+    if (selectedPlaceId !== 'all') {
+      const place = worshipPlaces.find((p) => p.id === selectedPlaceId);
+      if (place) {
+        if (place.city) setSelectedCity(place.city);
+        if (place.country) setSelectedCountry(place.country);
+        fetchPrayerTimes(place.city || 'Manchester', place.country || 'United Kingdom', coordinates.lat, coordinates.lng, calcMethod);
+      }
+    }
+  }, [selectedPlaceId, worshipPlaces]);
 
   // Update when calculation method or selected city changes
   useEffect(() => {

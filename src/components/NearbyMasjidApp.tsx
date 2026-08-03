@@ -168,17 +168,17 @@ export const NearbyMasjidApp: React.FC<NearbyMasjidAppProps> = ({
     <div className="space-y-6 animate-fadeIn">
       
       {/* MOBILE APP TOP HEADER BANNER */}
-      <div className="bg-gradient-to-r from-emerald-950 via-slate-900 to-teal-950 border border-emerald-500/30 rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden">
+      <div className="bg-gradient-to-r from-emerald-950 via-slate-900 to-teal-950 border border-emerald-500/30 rounded-3xl p-4 sm:p-8 shadow-2xl relative overflow-hidden">
         <div className="absolute -right-10 -bottom-10 w-72 h-72 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-2 max-w-2xl">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
               <Compass className="w-3.5 h-3.5 text-amber-400" />
               Worshipper Companion App
             </div>
 
-            <h2 className="text-2xl sm:text-3xl font-bold font-serif text-stone-100 tracking-tight">
+            <h2 className="text-xl sm:text-3xl font-bold font-serif text-stone-100 tracking-tight">
               Find & Join Nearby Masjids & Congregations
             </h2>
 
@@ -188,52 +188,52 @@ export const NearbyMasjidApp: React.FC<NearbyMasjidAppProps> = ({
           </div>
 
           {/* Quick Joined Count Pill */}
-          <div className="bg-stone-900/90 border border-emerald-500/30 p-4 rounded-2xl flex items-center gap-4 shadow-xl flex-shrink-0">
-            <div className="w-12 h-12 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-xl border border-emerald-500/30">
+          <div className="bg-stone-900/90 border border-emerald-500/30 p-3.5 rounded-2xl flex items-center gap-3 shadow-xl flex-shrink-0">
+            <div className="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-lg border border-emerald-500/30">
               {joinedPlaceIds.length}
             </div>
             <div>
-              <p className="text-xs text-stone-400 font-semibold uppercase">Joined Masjids</p>
+              <p className="text-[10px] sm:text-xs text-stone-400 font-semibold uppercase">Joined Masjids</p>
               <p className="text-xs font-bold text-stone-200">Receiving Live Dispatches</p>
             </div>
           </div>
         </div>
 
         {/* View Mode Tabs */}
-        <div className="flex items-center gap-2 mt-6 pt-4 border-t border-stone-800/80">
+        <div className="flex items-center gap-2 mt-5 pt-3.5 border-t border-stone-800/80 overflow-x-auto no-scrollbar max-w-full pb-1">
           <button
             onClick={() => setActiveTab('discover')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
+            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap flex-shrink-0 ${
               activeTab === 'discover'
                 ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-950/50'
                 : 'bg-stone-900/80 text-stone-400 hover:text-stone-200 border border-stone-800'
             }`}
           >
-            <Compass className="w-4 h-4" />
+            <Compass className="w-3.5 h-3.5" />
             Discover Nearby ({filteredPlaces.length})
           </button>
 
           <button
             onClick={() => setActiveTab('joined')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
+            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap flex-shrink-0 ${
               activeTab === 'joined'
                 ? 'bg-amber-600 text-white shadow-lg shadow-amber-950/50'
                 : 'bg-stone-900/80 text-stone-400 hover:text-stone-200 border border-stone-800'
             }`}
           >
-            <CheckCircle2 className="w-4 h-4" />
+            <CheckCircle2 className="w-3.5 h-3.5" />
             My Joined Masjids ({joinedPlaces.length})
           </button>
 
           <button
             onClick={() => setActiveTab('sermons')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
+            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap flex-shrink-0 ${
               activeTab === 'sermons'
                 ? 'bg-teal-600 text-white shadow-lg shadow-teal-950/50'
                 : 'bg-stone-900/80 text-stone-400 hover:text-stone-200 border border-stone-800'
             }`}
           >
-            <BookOpen className="w-4 h-4" />
+            <BookOpen className="w-3.5 h-3.5" />
             Sermon Feed ({sermons.length})
           </button>
         </div>

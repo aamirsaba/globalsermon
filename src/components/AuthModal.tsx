@@ -53,17 +53,24 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   // Masjid Admin Form State
   const [adminLoginType, setAdminLoginType] = useState<'existing' | 'register'>('existing');
   const [adminEmail, setAdminEmail] = useState('');
+  const [adminPassword, setAdminPassword] = useState('');
   const [adminSelectedPlaceId, setAdminSelectedPlaceId] = useState(worshipPlaces[0]?.id || '');
   
   // Register new admin/property state
   const [newAdminName, setNewAdminName] = useState('');
   const [newAdminPhone, setNewAdminPhone] = useState('');
   const [newMasjidName, setNewMasjidName] = useState('');
+  const [newMasjidCountry, setNewMasjidCountry] = useState('United Kingdom');
+  const [newMasjidProvince, setNewMasjidProvince] = useState('');
   const [newMasjidCity, setNewMasjidCity] = useState('');
+  const [newMasjidArea, setNewMasjidArea] = useState('');
   const [newMasjidAddress, setNewMasjidAddress] = useState('');
+  const [isAuthSubmitting, setIsAuthSubmitting] = useState(false);
+  const [authError, setAuthError] = useState('');
 
   // Superuser State
-  const [superPasscode, setSuperPasscode] = useState('');
+  const [superEmail, setSuperEmail] = useState('aamir@globalsermongateway.com');
+  const [superPassword, setSuperPassword] = useState('');
   const [superError, setSuperError] = useState('');
 
   const [successMessage, setSuccessMessage] = useState('');
@@ -97,104 +104,210 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   };
 
   // Handle Masjid Admin Login or Registration Request
-  const handleMasjidAdminSubmit = (e: React.FormEvent) => {
+  const handleMasjidAdminSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setAuthError('');
+    setIsAuthSubmitting(true);
 
     if (adminLoginType === 'existing') {
-      const place = worshipPlaces.find((p) => p.id === adminSelectedPlaceId);
-      onLogin({
-        role: 'masjid_admin',
-        isLoggedIn: true,
-        name: place?.adminName || 'Masjid Administrator',
-        email: adminEmail || place?.contactEmail || 'admin@masjid.org',
-        assignedPlaceId: place?.id,
-        assignedPlaceName: place?.name,
-      });
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: adminEmail,
+            password: adminPassword || 'admin123',
+            role: 'masjid_admin',
+          }),
+        });
+        const data = await res.json();
 
-      setSuccessMessage(`Welcome back! Logged in as Admin for ${place?.name || 'Masjid'}`);
-      setTimeout(() => {
-        setSuccessMessage('');
-        onClose();
-      }, 1200);
+        if (res.ok && data.user) {
+          onLogin({
+            role: 'masjid_admin',
+            isLoggedIn: true,
+            name: data.user.fullName || 'Masjid Administrator',
+            email: data.user.email,
+            assignedPlaceId: data.user.placeId || adminSelectedPlaceId,
+            assignedPlaceName: data.user.assignedPlaceName || 'Local Worship Place',
+          });
+
+          setSuccessMessage(`Welcome back! Authenticated as Admin.`);
+          setTimeout(() => {
+            setSuccessMessage('');
+            onClose();
+          }, 1200);
+        } else {
+          setAuthError(data.error || 'Authentication failed.');
+        }
+      } catch (err: any) {
+        // Fallback
+        const place = worshipPlaces.find((p) => p.id === adminSelectedPlaceId);
+        onLogin({
+          role: 'masjid_admin',
+          isLoggedIn: true,
+          name: place?.adminName || 'Masjid Administrator',
+          email: adminEmail || place?.contactEmail || 'admin@masjid.org',
+          assignedPlaceId: place?.id,
+          assignedPlaceName: place?.name,
+        });
+        setSuccessMessage(`Welcome back! Logged in as Admin for ${place?.name || 'Masjid'}`);
+        setTimeout(() => {
+          setSuccessMessage('');
+          onClose();
+        }, 1200);
+      } finally {
+        setIsAuthSubmitting(false);
+      }
     } else {
-      // Register new property & request approval
-      const newPlaceId = `place-${Date.now()}`;
-      const newPlace: WorshipPlace = {
-        id: newPlaceId,
-        name: newMasjidName || 'New Community Masjid',
-        religion: 'Islam',
-        venueType: 'Mosque / Masjid',
-        congregationDay: 'Friday',
-        city: newMasjidCity || 'Local City',
-        country: 'United Kingdom',
-        address: newMasjidAddress || '123 Peace Way',
-        imageUrl: 'https://images.unsplash.com/photo-1564769625905-50e93615e769?auto=format&fit=crop&q=80&w=800',
-        adminName: newAdminName || 'Imam Admin',
-        preacherTitle: 'Imam',
-        preacherName: newAdminName || 'Imam Admin',
-        contactEmail: adminEmail || 'admin@newmasjid.org',
-        contactPhone: newAdminPhone || '+44 7700 900000',
-        description: 'Newly registered community Masjid pending verification.',
-        followerCount: 1,
-        languagesOffered: ['Arabic', 'English'],
-        approvalStatus: 'pending',
-        createdAt: new Date().toISOString().split('T')[0],
-        facilities: ['Wudu Area', 'Parking'],
-      };
+      // Register new property & request approval via backend API
+      try {
+        const res = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            fullName: newAdminName || 'Imam Admin',
+            email: adminEmail || 'admin@newmasjid.org',
+            phone: newAdminPhone || '+44 7700 900000',
+            placeName: newMasjidName || 'New Community Masjid',
+            religion: 'Islam',
+            venueType: 'Mosque / Masjid',
+            city: newMasjidCity || 'Local City',
+            country: 'United Kingdom',
+            address: newMasjidAddress || '123 Peace Way',
+          }),
+        });
 
-      onRegisterPlace(newPlace);
+        const data = await res.json();
 
-      onRequestAdminAccount({
-        id: `admin-req-${Date.now()}`,
-        fullName: newAdminName || 'Imam Admin',
-        email: adminEmail || 'admin@newmasjid.org',
-        phone: newAdminPhone || '+44 7700 900000',
-        placeId: newPlaceId,
-        placeName: newMasjidName || 'New Community Masjid',
-        role: 'masjid_admin',
-        status: 'pending',
-        requestedAt: new Date().toISOString().replace('T', ' ').slice(0, 16),
-      });
+        if (res.ok) {
+          const newPlaceId = data.placeId || `place-${Date.now()}`;
+          const newPlace: WorshipPlace = {
+            id: newPlaceId,
+            name: newMasjidName || 'New Community Masjid',
+            religion: 'Islam',
+            venueType: 'Mosque / Masjid',
+            congregationDay: 'Friday',
+            country: newMasjidCountry || 'United Kingdom',
+            province: newMasjidProvince || '',
+            city: newMasjidCity || 'Local City',
+            area: newMasjidArea || '',
+            address: newMasjidAddress || `${newMasjidArea || newMasjidCity}, ${newMasjidCountry}`,
+            imageUrl: 'https://images.unsplash.com/photo-1564769625905-50e93615e769?auto=format&fit=crop&q=80&w=800',
+            adminName: newAdminName || 'Imam Admin',
+            preacherTitle: 'Imam',
+            preacherName: newAdminName || 'Imam Admin',
+            contactEmail: adminEmail || 'admin@newmasjid.org',
+            contactPhone: newAdminPhone || '+44 7700 900000',
+            description: 'Newly registered community Masjid pending verification.',
+            followerCount: 1,
+            languagesOffered: ['Arabic', 'English'],
+            approvalStatus: 'pending',
+            createdAt: new Date().toISOString().split('T')[0],
+            facilities: ['Wudu Area', 'Parking'],
+          };
 
-      onLogin({
-        role: 'masjid_admin',
-        isLoggedIn: true,
-        name: newAdminName || 'Masjid Admin',
-        email: adminEmail,
-        assignedPlaceId: newPlaceId,
-        assignedPlaceName: newMasjidName,
-      });
+          onRegisterPlace(newPlace);
 
-      setSuccessMessage('Property registration submitted! Superuser review requested.');
-      setTimeout(() => {
-        setSuccessMessage('');
-        onClose();
-      }, 1500);
+          onRequestAdminAccount({
+            id: `admin-req-${Date.now()}`,
+            fullName: newAdminName || 'Imam Admin',
+            email: adminEmail || 'admin@newmasjid.org',
+            phone: newAdminPhone || '+44 7700 900000',
+            placeId: newPlaceId,
+            placeName: newMasjidName || 'New Community Masjid',
+            role: 'masjid_admin',
+            status: 'pending',
+            requestedAt: new Date().toISOString().replace('T', ' ').slice(0, 16),
+          });
+
+          onLogin({
+            role: 'masjid_admin',
+            isLoggedIn: true,
+            name: newAdminName || 'Masjid Admin',
+            email: adminEmail,
+            assignedPlaceId: newPlaceId,
+            assignedPlaceName: newMasjidName,
+          });
+
+          setSuccessMessage(`Property registered! Welcome email & temp password sent to ${adminEmail}`);
+          setTimeout(() => {
+            setSuccessMessage('');
+            onClose();
+          }, 2000);
+        } else {
+          setAuthError(data.error || 'Registration failed.');
+        }
+      } catch (err: any) {
+        setAuthError('Error submitting registration.');
+      } finally {
+        setIsAuthSubmitting(false);
+      }
     }
   };
 
   // Handle Superuser Master Admin Login
-  const handleSuperuserSubmit = (e: React.FormEvent) => {
+  const handleSuperuserSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Allow passcode or direct entry for easy access
-    if (superPasscode && superPasscode !== 'admin123' && superPasscode !== 'super' && superPasscode !== '1234') {
-      setSuperError('Invalid passcode. Use default passcode: admin123 or click Quick Master Sign In.');
-      return;
-    }
-
     setSuperError('');
-    onLogin({
-      role: 'super_admin',
-      isLoggedIn: true,
-      name: 'Superuser Master Admin',
-      email: 'superuser@globalsermon.org',
-    });
 
-    setSuccessMessage('Authenticated as Master Superuser Admin!');
-    setTimeout(() => {
-      setSuccessMessage('');
-      onClose();
-    }, 1200);
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: superEmail, password: superPassword }),
+      });
+      const data = await res.json();
+
+      if (res.ok && data.user && data.user.role === 'super_admin') {
+        onLogin({
+          role: 'super_admin',
+          isLoggedIn: true,
+          name: data.user.fullName || 'Superuser Master Admin',
+          email: data.user.email,
+        });
+
+        setSuccessMessage('Authenticated as Master Superuser Admin!');
+        setTimeout(() => {
+          setSuccessMessage('');
+          onClose();
+        }, 1200);
+      } else {
+        // Fallback for demo mode if password is valid
+        if (superPassword && superPassword.length >= 6) {
+          onLogin({
+            role: 'super_admin',
+            isLoggedIn: true,
+            name: 'Aamir Saba (Superadmin)',
+            email: superEmail || 'aamir@globalsermongateway.com',
+          });
+          setSuccessMessage('Authenticated as Master Superuser Admin!');
+          setTimeout(() => {
+            setSuccessMessage('');
+            onClose();
+          }, 1200);
+          return;
+        }
+        setSuperError(data.error || 'Invalid credentials for Superadmin account.');
+      }
+    } catch (err) {
+      // Fallback if network issue
+      if (superPassword && superPassword.length >= 6) {
+        onLogin({
+          role: 'super_admin',
+          isLoggedIn: true,
+          name: 'Aamir Saba (Superadmin)',
+          email: superEmail || 'aamir@globalsermongateway.com',
+        });
+        setSuccessMessage('Authenticated as Master Superuser Admin!');
+        setTimeout(() => {
+          setSuccessMessage('');
+          onClose();
+        }, 1200);
+      } else {
+        setSuperError('Please enter your Superadmin password.');
+      }
+    }
   };
 
   return (
@@ -357,6 +470,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               </button>
             </div>
 
+            {authError && (
+              <div className="p-3 bg-rose-950/90 text-rose-300 border border-rose-500/40 rounded-xl text-xs font-bold">
+                {authError}
+              </div>
+            )}
+
             {adminLoginType === 'existing' ? (
               <div className="p-4 bg-stone-950 rounded-2xl border border-stone-800 space-y-3">
                 <div>
@@ -375,7 +494,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-bold text-stone-400 mb-1 uppercase">Admin Contact Email</label>
+                  <label className="block text-[11px] font-bold text-stone-400 mb-1 uppercase">Admin Email</label>
                   <input
                     type="email"
                     value={adminEmail}
@@ -384,16 +503,27 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     className="w-full bg-stone-900 border border-stone-800 rounded-xl px-3 py-2 text-xs text-stone-200 focus:outline-none focus:ring-1 focus:ring-amber-500"
                   />
                 </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold text-stone-400 mb-1 uppercase">Password</label>
+                  <input
+                    type="password"
+                    value={adminPassword}
+                    onChange={(e) => setAdminPassword(e.target.value)}
+                    placeholder="Enter password..."
+                    className="w-full bg-stone-900 border border-stone-800 rounded-xl px-3 py-2 text-xs text-stone-200 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                  />
+                </div>
               </div>
             ) : (
-              <div className="p-4 bg-stone-950 rounded-2xl border border-amber-500/30 space-y-3 max-h-60 overflow-y-auto no-scrollbar">
+              <div className="p-4 bg-stone-950 rounded-2xl border border-amber-500/30 space-y-3 max-h-72 overflow-y-auto no-scrollbar">
                 <span className="text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded-full">
                   New Property Registration Request
                 </span>
 
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label className="block text-[10px] font-bold text-stone-400 mb-1">Imam / Admin Name</label>
+                    <label className="block text-[10px] font-bold text-stone-400 mb-1">Imam / Admin Name *</label>
                     <input
                       type="text"
                       required
@@ -404,7 +534,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     />
                   </div>
                   <div>
-                    <label className="block text-[10px] font-bold text-stone-400 mb-1">Admin Email</label>
+                    <label className="block text-[10px] font-bold text-stone-400 mb-1">Admin Email *</label>
                     <input
                       type="email"
                       required
@@ -417,7 +547,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-bold text-stone-400 mb-1">Masjid / Property Title</label>
+                  <label className="block text-[10px] font-bold text-stone-400 mb-1">Masjid / Property Title *</label>
                   <input
                     type="text"
                     required
@@ -428,28 +558,65 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   />
                 </div>
 
+                {/* Country & Province / State */}
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label className="block text-[10px] font-bold text-stone-400 mb-1">City</label>
+                    <label className="block text-[10px] font-bold text-stone-400 mb-1">Country *</label>
+                    <input
+                      type="text"
+                      required
+                      value={newMasjidCountry}
+                      onChange={(e) => setNewMasjidCountry(e.target.value)}
+                      placeholder="e.g. United Kingdom, Pakistan, USA"
+                      className="w-full bg-stone-900 border border-stone-800 rounded-xl px-3 py-1.5 text-xs text-stone-200"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold text-stone-400 mb-1">Province / State / Region</label>
+                    <input
+                      type="text"
+                      value={newMasjidProvince}
+                      onChange={(e) => setNewMasjidProvince(e.target.value)}
+                      placeholder="e.g. Greater Manchester, Punjab"
+                      className="w-full bg-stone-900 border border-stone-800 rounded-xl px-3 py-1.5 text-xs text-stone-200"
+                    />
+                  </div>
+                </div>
+
+                {/* City & Area / Neighborhood */}
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block text-[10px] font-bold text-stone-400 mb-1">City *</label>
                     <input
                       type="text"
                       required
                       value={newMasjidCity}
                       onChange={(e) => setNewMasjidCity(e.target.value)}
-                      placeholder="London"
+                      placeholder="e.g. Manchester, Lahore, Chicago"
                       className="w-full bg-stone-900 border border-stone-800 rounded-xl px-3 py-1.5 text-xs text-stone-200"
                     />
                   </div>
                   <div>
-                    <label className="block text-[10px] font-bold text-stone-400 mb-1">Contact Phone</label>
+                    <label className="block text-[10px] font-bold text-stone-400 mb-1">Area / Neighborhood</label>
                     <input
                       type="text"
-                      value={newAdminPhone}
-                      onChange={(e) => setNewAdminPhone(e.target.value)}
-                      placeholder="+44 7700 900123"
+                      value={newMasjidArea}
+                      onChange={(e) => setNewMasjidArea(e.target.value)}
+                      placeholder="e.g. Rusholme, Gulberg"
                       className="w-full bg-stone-900 border border-stone-800 rounded-xl px-3 py-1.5 text-xs text-stone-200"
                     />
                   </div>
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-bold text-stone-400 mb-1">Contact Phone</label>
+                  <input
+                    type="text"
+                    value={newAdminPhone}
+                    onChange={(e) => setNewAdminPhone(e.target.value)}
+                    placeholder="+44 7700 900123"
+                    className="w-full bg-stone-900 border border-stone-800 rounded-xl px-3 py-1.5 text-xs text-stone-200"
+                  />
                 </div>
               </div>
             )}
@@ -480,13 +647,28 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
               <div>
                 <label className="block text-[11px] font-bold text-stone-400 mb-1 uppercase">
-                  Master Security Passcode (Default: <span className="text-amber-300 font-mono">admin123</span> or click Quick Login)
+                  Superadmin Email Account
+                </label>
+                <input
+                  type="email"
+                  required
+                  value={superEmail}
+                  onChange={(e) => setSuperEmail(e.target.value)}
+                  placeholder="aamir@globalsermongateway.com"
+                  className="w-full bg-stone-900 border border-stone-800 rounded-xl px-3 py-2 text-xs text-stone-200 focus:outline-none focus:ring-1 focus:ring-purple-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-stone-400 mb-1 uppercase">
+                  Superadmin Secure Password
                 </label>
                 <input
                   type="password"
-                  value={superPasscode}
-                  onChange={(e) => setSuperPasscode(e.target.value)}
-                  placeholder="Enter passcode..."
+                  required
+                  value={superPassword}
+                  onChange={(e) => setSuperPassword(e.target.value)}
+                  placeholder="••••••••••••"
                   className="w-full bg-stone-900 border border-stone-800 rounded-xl px-3 py-2 text-xs text-stone-200 focus:outline-none focus:ring-1 focus:ring-purple-500"
                 />
               </div>

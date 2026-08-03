@@ -99,6 +99,24 @@ export default function App() {
     setWorshipPlaces((prev) => [place, ...prev]);
   };
 
+  const handleDeletePlace = async (placeId: string) => {
+    try {
+      await fetch(`/api/places/${placeId}`, { method: 'DELETE' });
+    } catch (err) {
+      console.error('Failed to delete place from server:', err);
+    }
+    setWorshipPlaces((prev) => prev.filter((p) => p.id !== placeId));
+  };
+
+  const handleDeleteSermon = async (sermonId: string) => {
+    try {
+      await fetch(`/api/sermons/${sermonId}`, { method: 'DELETE' });
+    } catch (err) {
+      console.error('Failed to delete sermon from server:', err);
+    }
+    setSermons((prev) => prev.filter((s) => s.id !== sermonId));
+  };
+
   const handleApprovePlace = (placeId: string) => {
     setWorshipPlaces((prev) =>
       prev.map((p) => (p.id === placeId ? { ...p, approvalStatus: 'approved' } : p))
@@ -188,7 +206,7 @@ export default function App() {
       />
 
       {/* Main Container */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
+      <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6 space-y-8 w-full overflow-x-hidden sm:overflow-visible">
         
         {/* VIEW 0: NEARBY MASJIDS APP */}
         {activeTab === 'nearby_app' && (
@@ -356,6 +374,8 @@ export default function App() {
                         onSelectSermon={(s) => setSelectedSermonForModal(s)}
                         onJoinPlace={handleToggleJoinPlace}
                         isJoined={joinedPlaceIds.includes(place.id)}
+                        userRole={userRole}
+                        onDeletePlace={handleDeletePlace}
                       />
                     ))}
                   </div>
@@ -434,6 +454,8 @@ export default function App() {
             onRejectAdminAccount={handleRejectAdminAccount}
             onAddSermon={handleAddSermon}
             onSelectSermon={(s) => setSelectedSermonForModal(s)}
+            onDeletePlace={handleDeletePlace}
+            onDeleteSermon={handleDeleteSermon}
           />
         )}
 
@@ -479,6 +501,8 @@ export default function App() {
             setSelectedSermonForModal(null);
             setSelectedSermonForBroadcast(s);
           }}
+          onDeleteSermon={handleDeleteSermon}
+          userRole={userRole}
         />
       )}
 

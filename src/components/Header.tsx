@@ -44,36 +44,36 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenAuthModal,
 }) => {
   return (
-    <header className="sticky top-0 z-40 bg-stone-900/95 backdrop-blur-md border-b border-stone-800 text-stone-100 shadow-xl">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between py-3 gap-3">
+    <header className="sticky top-0 z-40 bg-stone-900/95 backdrop-blur-md border-b border-stone-800 text-stone-100 shadow-xl w-full max-w-full overflow-hidden">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between py-2.5 gap-2.5">
           
           {/* Brand Logo & Title */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 via-teal-600 to-amber-500 flex items-center justify-center text-stone-950 font-bold shadow-lg shadow-emerald-950/40">
-                <Globe className="w-6 h-6 stroke-[2.5]" />
+          <div className="flex flex-wrap items-center justify-between gap-2 w-full md:w-auto">
+            <div className="flex items-center gap-2 min-w-0 flex-1">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 via-teal-600 to-amber-500 flex items-center justify-center text-stone-950 font-bold shadow-lg shadow-emerald-950/40 flex-shrink-0">
+                <Globe className="w-5 h-5 stroke-[2.5]" />
               </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h1 className="text-xl font-bold tracking-tight text-stone-100 font-serif">
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <h1 className="text-sm sm:text-lg font-bold tracking-tight text-stone-100 font-serif leading-tight">
                     Global Sermon Gateway
                   </h1>
-                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full border border-emerald-500/30">
-                    <Sparkles className="w-3 h-3 text-amber-400" /> Multi-Faith AI
+                  <span className="inline-flex items-center gap-1 text-[10px] font-semibold bg-emerald-500/20 text-emerald-300 px-1.5 py-0.5 rounded-full border border-emerald-500/30 whitespace-nowrap">
+                    <Sparkles className="w-2.5 h-2.5 text-amber-400" /> Multi-Faith AI
                   </span>
                 </div>
-                <p className="text-xs text-stone-400 hidden sm:block">
+                <p className="text-[11px] text-stone-400 hidden sm:block truncate">
                   Universal Multilingual Masjid & Sermon Distribution Platform
                 </p>
               </div>
             </div>
 
             {/* Mobile Role Switcher */}
-            <div className="md:hidden flex items-center gap-1 bg-stone-800/90 p-1 rounded-lg border border-stone-700">
+            <div className="md:hidden flex items-center gap-0.5 bg-stone-800/90 p-1 rounded-lg border border-stone-700 flex-shrink-0">
               <button
                 onClick={() => setUserRole('worshipper')}
-                className={`px-2 py-1 text-xs rounded-md font-medium transition-all ${
+                className={`px-2 py-1 text-[10px] rounded-md font-medium transition-all ${
                   userRole === 'worshipper'
                     ? 'bg-emerald-600 text-white shadow'
                     : 'text-stone-400 hover:text-stone-200'
@@ -86,7 +86,7 @@ export const Header: React.FC<HeaderProps> = ({
                   setUserRole('masjid_admin');
                   setActiveTab('admin');
                 }}
-                className={`px-2 py-1 text-xs rounded-md font-medium transition-all ${
+                className={`px-2 py-1 text-[10px] rounded-md font-medium transition-all ${
                   userRole === 'masjid_admin'
                     ? 'bg-amber-600 text-white shadow'
                     : 'text-stone-400 hover:text-stone-200'
@@ -99,7 +99,7 @@ export const Header: React.FC<HeaderProps> = ({
                   setUserRole('super_admin');
                   setActiveTab('admin');
                 }}
-                className={`px-2 py-1 text-xs rounded-md font-medium transition-all ${
+                className={`px-2 py-1 text-[10px] rounded-md font-medium transition-all ${
                   userRole === 'super_admin'
                     ? 'bg-purple-600 text-white shadow'
                     : 'text-stone-400 hover:text-stone-200'
@@ -111,12 +111,12 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
 
           {/* Controls: Target Language Selector & Role Switcher */}
-          <div className="flex items-center justify-between md:justify-end gap-3 flex-wrap">
+          <div className="flex items-center justify-between md:justify-end gap-2 flex-wrap w-full md:w-auto">
             
             {/* Preferred Language Picker */}
-            <div className="flex items-center gap-2 bg-stone-800/90 px-3 py-1.5 rounded-xl border border-stone-700 shadow-inner">
-              <span className="text-xs text-stone-400 flex items-center gap-1 font-medium">
-                <Globe className="w-3.5 h-3.5 text-emerald-400" />
+            <div className="flex items-center gap-1.5 bg-stone-800/90 px-2 py-1 rounded-xl border border-stone-700 shadow-inner min-w-0">
+              <span className="text-xs text-stone-400 flex items-center gap-1 font-medium whitespace-nowrap">
+                <Globe className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
                 <span className="hidden sm:inline">Translate To:</span>
               </span>
               <select
@@ -125,7 +125,7 @@ export const Header: React.FC<HeaderProps> = ({
                   const lang = SUPPORTED_LANGUAGES.find((l) => l.code === e.target.value);
                   if (lang) setSelectedLanguage(lang);
                 }}
-                className="bg-stone-900 text-emerald-300 font-semibold text-xs rounded-lg px-2 py-1 border border-stone-700 focus:outline-none focus:ring-1 focus:ring-emerald-500 cursor-pointer"
+                className="bg-stone-900 text-emerald-300 font-semibold text-xs rounded-lg px-2 py-1 border border-stone-700 focus:outline-none focus:ring-1 focus:ring-emerald-500 cursor-pointer max-w-[130px] sm:max-w-none truncate"
               >
                 {SUPPORTED_LANGUAGES.map((lang) => (
                   <option key={lang.code} value={lang.code} className="bg-stone-900 text-stone-200">
@@ -138,22 +138,22 @@ export const Header: React.FC<HeaderProps> = ({
             {/* Account Sign In & Profile Button */}
             <button
               onClick={onOpenAuthModal}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-stone-800 hover:bg-stone-750 border border-amber-500/30 text-stone-200 transition-all text-xs font-semibold shadow-md"
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-stone-800 hover:bg-stone-750 border border-amber-500/30 text-stone-200 transition-all text-xs font-semibold shadow-md flex-shrink-0"
             >
-              <div className="w-6 h-6 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 flex items-center justify-center font-bold">
+              <div className="w-5 h-5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 flex items-center justify-center font-bold flex-shrink-0">
                 {currentSession.role === 'super_admin' ? (
-                  <Crown className="w-3.5 h-3.5 text-amber-300" />
+                  <Crown className="w-3 h-3 text-amber-300" />
                 ) : currentSession.role === 'masjid_admin' ? (
-                  <Building2 className="w-3.5 h-3.5 text-amber-300" />
+                  <Building2 className="w-3 h-3 text-amber-300" />
                 ) : (
-                  <User className="w-3.5 h-3.5 text-emerald-400" />
+                  <User className="w-3 h-3 text-emerald-400" />
                 )}
               </div>
-              <div className="text-left hidden sm:block">
-                <div className="text-[11px] font-bold text-stone-100 leading-none">
+              <div className="text-left hidden sm:block max-w-[120px] truncate">
+                <div className="text-[11px] font-bold text-stone-100 leading-none truncate">
                   {currentSession.name || 'Sign In / Register'}
                 </div>
-                <div className="text-[9px] text-amber-400 font-medium leading-tight">
+                <div className="text-[9px] text-amber-400 font-medium leading-tight truncate">
                   {currentSession.role === 'super_admin'
                     ? 'Superuser Admin'
                     : currentSession.role === 'masjid_admin'
@@ -161,7 +161,10 @@ export const Header: React.FC<HeaderProps> = ({
                     : currentSession.assignedPlaceName || 'Worshipper User'}
                 </div>
               </div>
-              <LogIn className="w-3.5 h-3.5 text-stone-400" />
+              <span className="sm:hidden text-stone-200 text-xs font-medium">
+                {currentSession.isLoggedIn ? (currentSession.name?.split(' ')[0] || 'Account') : 'Sign In'}
+              </span>
+              <LogIn className="w-3 h-3 text-stone-400 flex-shrink-0" />
             </button>
 
             {/* Role Switcher Pills (Desktop) */}
@@ -221,7 +224,7 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
 
         {/* Navigation Tabs */}
-        <div className="flex items-center gap-2 overflow-x-auto py-2 border-t border-stone-800/80 no-scrollbar">
+        <div className="flex items-center gap-2 overflow-x-auto py-2 border-t border-stone-800/80 no-scrollbar max-w-full">
           <button
             onClick={() => setActiveTab('nearby_app')}
             className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${

@@ -31,8 +31,10 @@ export interface WorshipPlace {
   religion: Religion;
   venueType: string; // e.g. "Mosque / Masjid", "Church", "Temple", "Synagogue", "Gurdwara"
   congregationDay: CongregationDay;
-  city: string;
   country: string;
+  province?: string; // State / Province / Region
+  city: string;
+  area?: string; // District / Neighborhood / Local Area
   address: string;
   imageUrl: string;
   adminName: string;
